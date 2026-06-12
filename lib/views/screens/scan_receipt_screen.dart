@@ -325,7 +325,7 @@ class _SingleResultViewState extends State<_SingleResultView> {
                   items: _accounts.map((a) {
                     return DropdownMenuItem(
                         value: a.id,
-                        child: Text(a.name));
+                        child: Text(a.name, overflow: TextOverflow.ellipsis));
                   }).toList(),
                   onChanged: (v) => setState(() => _selectedAccountId = v?.id ?? v),
                   colors: colors,
@@ -338,7 +338,7 @@ class _SingleResultViewState extends State<_SingleResultView> {
                     orElse: () => _categories.first,
                   ),
                   items: _categories.map((c) {
-                    return DropdownMenuItem(value: c, child: Text(c.name));
+                    return DropdownMenuItem(value: c, child: Text(c.name, overflow: TextOverflow.ellipsis));
                   }).toList(),
                   onChanged: (v) => setState(() => _selectedCategoryId = v?.id),
                   colors: colors,
@@ -481,9 +481,12 @@ class _BulkResultViewState extends State<_BulkResultView> {
               const Icon(Icons.check_circle_outline,
                   color: AppColors.success, size: 18),
               const SizedBox(width: 8),
-              Text('${txs.length} transactions found',
-                  style: AppTextStyles.labelLarge),
-              const Spacer(),
+              Expanded(
+                child: Text('${txs.length} transactions found',
+                    style: AppTextStyles.labelLarge,
+                    overflow: TextOverflow.ellipsis),
+              ),
+              const SizedBox(width: 8),
               if (_accounts.isNotEmpty)
                 Flexible(
                   child: Align(
@@ -548,24 +551,29 @@ class _BulkResultViewState extends State<_BulkResultView> {
                     ),
                     const SizedBox(width: 8),
                     if (_categories.isNotEmpty)
-                      DropdownButton<Category>(
-                        value: _categories.firstWhere(
-                          (c) => c.id == tx.categoryId,
-                          orElse: () => _categories.first,
+                      Container(
+                        constraints: const BoxConstraints(maxWidth: 110),
+                        child: DropdownButton<Category>(
+                          isExpanded: true,
+                          value: _categories.firstWhere(
+                            (c) => c.id == tx.categoryId,
+                            orElse: () => _categories.first,
+                          ),
+                          underline: const SizedBox.shrink(),
+                          dropdownColor: colors.surface,
+                          items: _categories
+                              .map((c) => DropdownMenuItem(
+                                  value: c,
+                                  child: Text(c.name,
+                                      style: AppTextStyles.bodySmall,
+                                      overflow: TextOverflow.ellipsis)))
+                              .toList(),
+                          onChanged: (c) {
+                            if (c != null) {
+                              vm.updateBulkTransactionCategory(i, c.id);
+                            }
+                          },
                         ),
-                        underline: const SizedBox.shrink(),
-                        dropdownColor: colors.surface,
-                        items: _categories
-                            .map((c) => DropdownMenuItem(
-                                value: c,
-                                child: Text(c.name,
-                                    style: AppTextStyles.bodySmall)))
-                            .toList(),
-                        onChanged: (c) {
-                          if (c != null) {
-                            vm.updateBulkTransactionCategory(i, c.id);
-                          }
-                        },
                       ),
                   ],
                 ),
