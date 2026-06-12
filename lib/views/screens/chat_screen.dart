@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart' as md;
 import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_text_styles.dart';
@@ -79,6 +80,16 @@ class _ChatScreenState extends State<ChatScreen> {
         curve: Curves.easeOutCubic,
       );
     }
+  }
+
+  String _formatAiText(String text) {
+    // Fix missing newlines before tables
+    text = text.replaceAll(': |', ':\n\n|');
+    text = text.replaceAll('. |', '.\n\n|');
+    // Fix missing newlines between table rows
+    text = text.replaceAll(' | | ', ' |\n| ');
+    text = text.replaceAll('||', '|\n|');
+    return text;
   }
 
   @override
@@ -405,7 +416,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         isUser
                             ? Text(msg.content, style: AppTextStyles.bodyLarge)
                             : MarkdownBody(
-                                data: msg.content,
+                                data: _formatAiText(msg.content),
+                                extensionSet: md.ExtensionSet.gitHubFlavored,
                                 styleSheet: MarkdownStyleSheet(
                                   p: AppTextStyles.bodyLarge,
                                   a: const TextStyle(color: AppColors.brand),
